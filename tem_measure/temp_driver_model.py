@@ -48,7 +48,7 @@ class MLX90614:
         temp = (data * 0.02) - 273.15
         return temp
 
-    def get_amb_temp(self):
+    def get_outside_temp(self):
         data = self.read_reg(self.MLX90614_TA)
         return self.data_to_temp(data)
 
@@ -59,5 +59,8 @@ class MLX90614:
 
 if __name__ == "__main__":
     sensor = MLX90614()
-    print('amb:', sensor.get_amb_temp())
+    from temp_comp_model import TempComp
+    temp_comp_obj = TempComp(wrist_temp=sensor.get_obj_temp(), outside_temp=sensor.get_outside_temp())
+    print('amb:', sensor.get_outside_temp())
     print('job1:', sensor.get_obj_temp())
+    print(temp_comp_obj.forehead_temp)

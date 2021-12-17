@@ -1,7 +1,5 @@
 import os
-
 from configparser import ConfigParser
-# from utils.parse import parse
 
 class SysConfig:
     # 读取配置文件
