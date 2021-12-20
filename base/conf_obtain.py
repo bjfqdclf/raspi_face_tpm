@@ -1,6 +1,7 @@
 import os
 from configparser import ConfigParser
 
+
 class SysConfig:
     # 读取配置文件
     conf_exit = False

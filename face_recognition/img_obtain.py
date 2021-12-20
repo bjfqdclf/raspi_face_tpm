@@ -5,17 +5,18 @@ cap = cv.VideoCapture(0)
 
 num = 1
 
-while(cap.isOpened()):
+while (cap.isOpened()):
     ret_flag, Vshow = cap.read()
     cv.imshow('Capture_Test', Vshow)
     k = cv.waitKey(1) & 0xFF
-    if k == ord('s'):   # 保存
-        cv.imwrite('img/'+str(num)+'.myface'+'.jpg', Vshow)
-        print('success to save'+str(num)+'.jpg')
+    if k == ord('s'):  # 保存
+        cv.imwrite('img/' + str(num) + '.myface' + '.jpg', Vshow)
+        print('success to save' + str(num) + '.jpg')
         print('-----------------------')
         num += 1
-    elif k == ord(' '):  # 退出
-        break
+    if face:
+
+
 
 # 释放内存
 cv.destroyAllWindows()
