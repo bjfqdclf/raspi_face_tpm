@@ -2,7 +2,7 @@ import RPi.GPIO as GPIO
 import time
 
 
-class DistanceDrvier:
+class DistanceDriver:
     TRIG = 24
     ECHO = 23
     RED_LED = 26
@@ -69,16 +69,26 @@ class DistanceDrvier:
         try:
             self.distanceInit()
             distance = self.distanceStart()
-            print("Distance:{}cm".format(distance))
+            return distance
         except KeyboardInterrupt:
             if self.pwm is not None:
                 self.pwm.stop()
             GPIO.cleanup()
 
 
-enable_distance = DistanceDrvier()
+enable_distance_driver = DistanceDriver()
 
 if __name__ == '__main__':
     while True:
-        enable_distance.get_distance()
+        disce_list = []
+        for i in range(5):
+            disce_list.append(enable_distance_driver.get_distance())
+        disce_list.sort()
+        disce_list.remove(disce_list[0])
+        disce_list.remove(disce_list[-1])
+        res = 0
+        for i in disce_list:
+            res += i
+        res = res / len(disce_list)
+        print('res:', res)
         time.sleep(2)
