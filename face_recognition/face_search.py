@@ -1,17 +1,19 @@
 from tencentcloud.common import credential
 from tencentcloud.common.exception.tencent_cloud_sdk_exception import TencentCloudSDKException
 from tencentcloud.iai.v20200303 import iai_client, models
+from base.log_server import LogServer
 import base64
 import json
 import time
 
 
-def face_research(img_dir):
+def face_search(img_dir):
     """
     人脸搜索
     img_dir: 需要搜索的图片
     return: PersonId, PersonName
     """
+    log = LogServer('face_search')
     start = time.time()
     # img_dir = 'C:/Users/bjfqdclf/OneDrive/专属文件夹/学习/毕业设计\program/opencv_demo/img/1.name.jpg'
     with open(img_dir, 'rb') as f:
@@ -42,14 +44,13 @@ def face_research(img_dir):
         PersonId = Candidates['PersonId']
         PersonName = Candidates['PersonName']
         Score = Candidates['Score']  # 匹配度(官方SDK文档建议80)
-        print('id>>', PersonId)
-        print('name>>', PersonName)
-        print('本次搜索用时>>', time.time() - start)
+        log.info(f'{PersonName}({PersonId})匹配度:{Score}% & 搜索耗时:{time.time() - start}')
+
         if Score < 80:
-            print('人脸匹配度低')
+            log.info('人脸匹配度低')
             return False
         return PersonId, PersonName
 
     except TencentCloudSDKException as err:
-        print(err)
+        log.error(err)
         return False

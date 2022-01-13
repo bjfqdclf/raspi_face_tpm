@@ -1,12 +1,13 @@
 import cv2 as cv
 from PIL import Image, ImageDraw, ImageFont
-from tengxun_cloud.face_research import face_research
+from face_recognition.face_search import face_search
 import numpy as np
+from base.log_server import LogServer
 
 
 class FaceServer:
     WAIT_KEY = 16
-
+    log = LogServer('img_processing')
     face_search_lock = False
     person_id = None
     person_name = None
@@ -18,7 +19,7 @@ class FaceServer:
         try:
             self.cap = cv.VideoCapture(0)  # 打开默认摄像头
         except Exception as err:
-            print(err)
+            self.log.error(err)
 
         self.face_start()
 
@@ -37,6 +38,7 @@ class FaceServer:
                     self.person_name = None
 
                 if ord('q') == cv.waitKey(self.WAIT_KEY):
+                    self.log.info('程序退出...')
                     break
                 continue
 
@@ -52,14 +54,16 @@ class FaceServer:
                 x, y, w, h = self.now_face
                 img_search = self.save_search(france)
                 cv.imwrite('img/face_search.jpg', img_search)
-                face_res = face_research('img/face_search.jpg')
+                face_res = face_search('img/face_search.jpg')
                 if face_res:  # 匹配到人脸
                     self.person_id, self.person_name = face_res
                     self.face_search_lock = True
                     self.face_remove_count = 0
                     self.last_face = self.now_face
+                    self.log.info(f'检测到{self.person_name}')
 
             if ord('q') == cv.waitKey(self.WAIT_KEY):
+                self.log.info('程序退出...')
                 break
         # 释放内存
         cv.destroyAllWindows()
