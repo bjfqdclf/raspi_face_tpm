@@ -123,7 +123,7 @@ class FaceServer:
         face_area_percentage = (now_h * now_w) / (last_h * last_w)
         if face_area_percentage < (1 - size_threshold) or face_area_percentage > (1 + size_threshold):
             return False
-        # 位置判定
+        # 位置判定 TODO
 
         return True
 
