@@ -34,3 +34,18 @@ class LogServer:
         if self.out_put:
             self.logger.addHandler(self.sh)
         self.logger.addHandler(self.fh)
+
+    def info(self, msg):
+        self.logger.info(msg)
+
+    def debug(self, msg):
+        self.logger.debug(msg)
+
+    def warning(self, msg):
+        self.logger.warning(msg)
+
+    def error(self, msg):
+        self.logger.error(msg)
+
+    def critical(self, msg):
+        self.logger.critical(msg)
