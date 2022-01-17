@@ -1,5 +1,7 @@
 import math
 
+from distance_measure.distance_driver_model import enable_distance_driver
+
 
 class TempComp:
     def __init__(self, obj_temp, outside_temp=None):
@@ -27,13 +29,8 @@ class TempComp:
         # outside_temp = self.outside_temp
 
     @staticmethod
-    def distance_compensation(temp, distance=20):
+    def distance_compensation(temp):
         """距离补偿"""
+        distance = enable_distance_driver.get_distance()
         temp = 0.5179 * distance + 0.9436 * distance - 0.0139 * distance * temp + 2.1898
         return temp
-
-# if __name__ == '__main__':
-#     obj = TempComp(wrist_temp=30, outside_temp=24)
-#     print(obj.forehead_temp)
-#     obj2 = TempComp(forehead_temp=obj.forehead_temp, outside_temp=24)
-#     print(obj2.wrist_temp)
