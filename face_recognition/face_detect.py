@@ -3,12 +3,18 @@ from PIL import Image, ImageDraw, ImageFont
 from face_recognition.face_search import face_search
 import numpy as np
 from base.log_server import LogServer
+from base.conf_obtain import sys_config
+from tem_measure.temp_comp_model import TempComp
+from tem_measure.temp_driver_model import enable_temp_driver
 
 
 class FaceServer:
+    DEVICE_id = sys_config.device_id
     WAIT_KEY = 16
     log = LogServer('img_processing')
+
     face_search_lock = False
+    is_temp = False
     person_id = None
     person_name = None
     face_remove_count = 0
@@ -33,9 +39,7 @@ class FaceServer:
             if isinstance(face, tuple):  # 未检测到人脸
                 self.face_remove_count += 1
                 if self.face_remove_count > 10:
-                    self.face_search_lock = False
-                    self.person_id = None
-                    self.person_name = None
+                    self.init_all_static_var()
 
                 if ord('q') == cv.waitKey(self.WAIT_KEY):
                     self.log.info('程序退出...')
@@ -46,9 +50,7 @@ class FaceServer:
             self.now_face = face[0]
             is_same_face = self.same_face()
             if not is_same_face and self.face_search_lock:
-                self.face_search_lock = False
-                self.person_id = None
-                self.person_name = None
+                self.init_all_static_var()
 
             if (not self.face_search_lock) and (not self.person_id):
                 x, y, w, h = self.now_face
@@ -61,6 +63,20 @@ class FaceServer:
                     self.face_remove_count = 0
                     self.last_face = self.now_face
                     self.log.info(f'检测到{self.person_name}')
+            if self.person_id and not self.is_temp:
+                # 温度检测
+                try:
+                    obj_temp = enable_temp_driver.get_obj_temp()  # 测量温度
+                    outside_temp = enable_temp_driver.get_outside_temp()  # 环境温度
+                    # 根据系统配置决定是否需要补偿
+                    person_temp = self.temp_compensation(obj_temp, outside_temp)
+                    if person_temp:
+                        # 存数据库 TODO
+                        self.data_save()
+                        self.is_temp = True
+
+                except Exception as err:
+                    self.log.error(err)
 
             if ord('q') == cv.waitKey(self.WAIT_KEY):
                 self.log.info('程序退出...')
@@ -133,6 +149,16 @@ class FaceServer:
 
     @staticmethod
     def _cv2_add_chinese_text(img, text, position, text_color=(0, 255, 0), text_size=30):
+        """
+        给图片加中文文字
+
+        :param img: 图片
+        :param text: 文本
+        :param position: 位置
+        :param text_color: 文字颜色
+        :param text_size: 文字大小
+        :return: img 图片
+        """
         if isinstance(img, np.ndarray):  # 判断是否OpenCV图片类型
             img = Image.fromarray(cv.cvtColor(img, cv.COLOR_BGR2RGB))
         # 创建一个可以在给定图像上绘图的对象
@@ -143,3 +169,40 @@ class FaceServer:
         draw.text(position, text, text_color, font=font_style)
         # 转换回OpenCV格式
         return cv.cvtColor(np.asarray(img), cv.COLOR_RGB2BGR)
+
+    def init_all_static_var(self):
+        """
+        初始化所有的参数
+        使用情况：
+            未识别到人脸
+            检测到换人
+        """
+        self.face_search_lock = False
+        self.person_id = None
+        self.person_name = None
+        self.is_temp = False
+
+    def temp_compensation(self, obj_temp, outside_temp):
+        """
+        温度补偿
+
+        测腕温 开启温度补偿
+        开启温度&距离补偿：先补偿距离再转化温度
+
+        :param obj_temp: 人体温度
+        :param outside_temp: 室温
+        :return:
+        """
+        if not obj_temp or not outside_temp:
+            return False
+        if sys_config.distance_compensation:  # 开启距离补偿
+            obj_temp = TempComp.distance_compensation(obj_temp)
+        person_temp = obj_temp
+        if sys_config.measure_parts:  # 测腕温 开启温度补偿
+            temp_comp = TempComp(obj_temp, outside_temp)
+            person_temp = temp_comp.wrist_to_forehead_temp()
+        return person_temp
+
+    def data_save(self):
+        person_name = self.person_name
+        person_id = self.person_id

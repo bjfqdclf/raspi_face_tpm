@@ -13,11 +13,20 @@ class SysConfig:
         try:
             conf = ConfigParser()
             conf.read(conf_name, encoding="utf-8")
+            # 读取设备信息
+            device_id = conf.get("device_info", "device_id")
             # 读取TX_API配置
             SecretId = conf.get("tx_api", "secret_id")
             SecretKey = conf.get("tx_api", "secret_key")
-
-
+            # 读取log配置
+            file_dir = conf.get("log", "file_dir")
+            file_level = conf.get("log", "file_level")
+            stream_level = conf.get("log", "stream_level")
+            out_put = conf.get("log", "out_put")
+            # 读取测温配置
+            temp_compensation = conf.get("temp", "temp_compensation")
+            measure_parts = conf.get("temp", "measure_parts")  # 0：额温    1：腕温
+            distance_compensation = conf.get("temp", "distance_compensation")
 
         except KeyError as e:
             pass
