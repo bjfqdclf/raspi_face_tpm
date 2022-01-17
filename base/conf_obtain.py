@@ -18,15 +18,21 @@ class SysConfig:
             # 读取TX_API配置
             SecretId = conf.get("tx_api", "secret_id")
             SecretKey = conf.get("tx_api", "secret_key")
+            # 读取database配置
+            db_engine = conf.get("database", "db_engine")
+            db_name = conf.get("database", "db_name")
+            db_user = conf.get("database", "db_user")
+            db_password = conf.get("database", "db_password")
+            db_addr = conf.get("database", "db_addr")
+            db_port = int(conf.get("database", "db_port"))
             # 读取log配置
-            file_dir = conf.get("log", "file_dir")
-            file_level = conf.get("log", "file_level")
-            stream_level = conf.get("log", "stream_level")
-            out_put = conf.get("log", "out_put")
+            file_dir = conf.get("log", "file_dir", fallback="/home/face_sys_log.log")
+            file_level = conf.get("log", "file_level", fallback="DEBUG")
+            stream_level = conf.get("log", "stream_level", fallback="DEBUG")
+            out_put = conf.get("log", "out_put", fallback=True)
             # 读取测温配置
-            temp_compensation = conf.get("temp", "temp_compensation")
-            measure_parts = conf.get("temp", "measure_parts")  # 0：额温    1：腕温
-            distance_compensation = conf.get("temp", "distance_compensation")
+            measure_parts = conf.get("temp", "measure_parts", fallback=1)  # 0：额温    1：腕温
+            distance_compensation = conf.get("temp", "distance_compensation", fallback=False)
 
         except KeyError as e:
             pass

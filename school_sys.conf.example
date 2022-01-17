@@ -1,0 +1,25 @@
+[device_info]
+device_id = 001
+
+
+[database]
+db_addr = 127.0.0.1
+db_port = 3456
+db_database = school_sys
+db_username = name
+db_password = pwd
+
+[tx_api]
+# 腾讯人脸识别API
+secret_id = 111
+secret_key = 111
+
+[log]
+file_name = /home/face_sys_log.log
+out_put = True
+file_level = DEBUG
+stream_level = DEBUG
+
+[temp]
+measure_parts = 1  # 0：额温    1：腕温
+distance_compensation = False   # 距离补偿 需要有超声波传感器
