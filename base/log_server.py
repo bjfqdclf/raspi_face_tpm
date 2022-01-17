@@ -1,5 +1,6 @@
 import logging
 import colorlog
+from base.conf_obtain import sys_config
 
 
 class LogServer:
@@ -11,7 +12,12 @@ class LogServer:
         'CRITICAL': 'bold_red',
     }
 
-    def __init__(self, name, filename="sys.log", out_put=True, file_level='DEBUG', stream_level='DEBUG'):
+    FILE_DIR = sys_config.file_dir
+    FILE_LEVEL = sys_config.file_level
+    STREAM_LEVEL = sys_config.stream_level
+    OUT_PUT = sys_config.out_put
+
+    def __init__(self, name, filename=FILE_DIR, out_put=OUT_PUT, file_level=FILE_LEVEL, stream_level=STREAM_LEVEL):
         self.filename = filename
         self.out_put = out_put
         self.file_level = file_level
