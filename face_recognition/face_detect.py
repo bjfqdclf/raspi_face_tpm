@@ -1,5 +1,7 @@
 import cv2 as cv
 from PIL import Image, ImageDraw, ImageFont
+
+from base.sys_math_interface import math_server
 from face_recognition.face_search import face_search
 import numpy as np
 from base.log_server import LogServer
@@ -7,7 +9,6 @@ from base.conf_obtain import sys_config
 from tem_measure.temp_comp_model import TempComp
 from tem_measure.temp_driver_model import enable_temp_driver
 from base.db_server import db_server
-import time
 
 
 class FaceServer:
@@ -73,7 +74,7 @@ class FaceServer:
                     # 根据系统配置决定是否需要补偿
                     person_temp = self.temp_compensation(obj_temp, outside_temp)
                     if person_temp:
-                        # 存数据库 TODO
+                        # 存数据库
                         self.data_save(person_temp)
                         self.is_temp = True
 
@@ -130,7 +131,8 @@ class FaceServer:
         设置人脸框大小变化阈值：如宽度高度超出阈值则判定不为同一个个人
             前后面积比值
 
-        设置位移阈值：超出位移阈值则判定不为同一个个人
+        设置位移阈值：
+            中心点位移距离 = 两矩形中心点间的距离
         """
 
         if self.last_face is None:
@@ -145,8 +147,11 @@ class FaceServer:
         face_area_percentage = (now_h * now_w) / (last_h * last_w)
         if face_area_percentage < (1 - size_threshold) or face_area_percentage > (1 + size_threshold):
             return False
-        # 位置判定 TODO
-
+        # 位置判定
+        distance = math_server.ptop_distance((last_x + last_w) / 2, (last_y + last_h) / 2, (now_x + now_w) / 2,
+                                             (now_y + now_h) / 2)
+        if distance > 20:
+            return False
         return True
 
     @staticmethod
@@ -183,6 +188,7 @@ class FaceServer:
         self.person_id = None
         self.person_name = None
         self.is_temp = False
+        self.log.info("初始化参数")
 
     def temp_compensation(self, obj_temp, outside_temp):
         """
@@ -193,7 +199,7 @@ class FaceServer:
 
         :param obj_temp: 人体温度
         :param outside_temp: 室温
-        :return:
+        :return: person_temp 计算后的实际温度
         """
         if not obj_temp or not outside_temp:
             return False
