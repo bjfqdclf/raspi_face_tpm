@@ -6,12 +6,14 @@ from base.log_server import LogServer
 from base.conf_obtain import sys_config
 from tem_measure.temp_comp_model import TempComp
 from tem_measure.temp_driver_model import enable_temp_driver
+from base.db_server import db_server
+import time
 
 
 class FaceServer:
-    DEVICE_id = sys_config.device_id
+    DEVICE_ID = sys_config.device_id
     WAIT_KEY = 16
-    log = LogServer('img_processing')
+    log = LogServer('face_server')
 
     face_search_lock = False
     is_temp = False
@@ -64,7 +66,7 @@ class FaceServer:
                     self.last_face = self.now_face
                     self.log.info(f'检测到{self.person_name}')
             if self.person_id and not self.is_temp:
-                # 温度检测
+                # 温度检测 有人员id信息&没有温度测量
                 try:
                     obj_temp = enable_temp_driver.get_obj_temp()  # 测量温度
                     outside_temp = enable_temp_driver.get_outside_temp()  # 环境温度
@@ -72,7 +74,7 @@ class FaceServer:
                     person_temp = self.temp_compensation(obj_temp, outside_temp)
                     if person_temp:
                         # 存数据库 TODO
-                        self.data_save()
+                        self.data_save(person_temp)
                         self.is_temp = True
 
                 except Exception as err:
@@ -203,6 +205,10 @@ class FaceServer:
             person_temp = temp_comp.wrist_to_forehead_temp()
         return person_temp
 
-    def data_save(self):
-        person_name = self.person_name
-        person_id = self.person_id
+    def data_save(self, person_temp):
+        """
+        将人的信息与对应温度、时间、设备信息存入数据库
+        """
+        time = db_server.db_datetime()
+        sql = f"""INSERT INTO app01_dailyfacerecord(person_name,person_id,temp,device_id,time) VALUES ('{self.person_name}','{self.person_id}',{person_temp},{self.DEVICE_ID},'{time}')"""
+        db_server.db_execute(sql)

@@ -1,6 +1,7 @@
 import pymysql
 from base.conf_obtain import sys_config
 from base.log_server import LogServer
+import datetime
 
 
 class DatabaseServer:
@@ -29,7 +30,17 @@ class DatabaseServer:
             self.log.info("数据库连接成功")
         except Exception as err:
             self.log.error(err)
-            print(err)
+            self.log.debug('数据库未连接')
+
+    @staticmethod
+    def db_datetime():
+        """
+        生成与sql的datetime格式匹配的当前时间
+        """
+        time = str(datetime.datetime.now()).split('.')[0]
+        time = datetime.datetime.strptime(time, '%Y-%m-%d %H:%M:%S')
+        # time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        return time
 
     def db_execute(self, sql):
         try:

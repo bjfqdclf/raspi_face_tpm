@@ -16,7 +16,7 @@ class SysConfig:
             conf = ConfigParser()
             conf.read(conf_name, encoding="utf-8")
             # 读取设备信息
-            device_id = conf.get("device_info", "device_id")
+            device_id = int(conf.get("device_info", "device_id"))
             # 读取TX_API配置
             SecretId = conf.get("tx_api", "secret_id")
             SecretKey = conf.get("tx_api", "secret_key")
