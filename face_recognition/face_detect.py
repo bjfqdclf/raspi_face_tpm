@@ -1,6 +1,6 @@
 import cv2 as cv
 from PIL import Image, ImageDraw, ImageFont
-
+import os
 from base.sys_math_interface import math_server
 from face_recognition.face_search import face_search
 import numpy as np
@@ -13,7 +13,7 @@ from base.db_server import db_server
 
 class FaceServer:
     DEVICE_ID = sys_config.device_id
-    WAIT_KEY = 16
+    WAIT_KEY = 10
     log = LogServer('face_server')
 
     face_search_lock = False
@@ -58,8 +58,8 @@ class FaceServer:
             if (not self.face_search_lock) and (not self.person_id):
                 x, y, w, h = self.now_face
                 img_search = self.save_search(france)
-                cv.imwrite('img/face_search.jpg', img_search)
-                face_res = face_search('img/face_search.jpg')
+                cv.imwrite('/home/lah/bs/face_server/face_recognition/img/face_search.jpg', img_search)
+                face_res = face_search('/home/lah/bs/face_server/face_recognition/img/face_search.jpg')
                 if face_res:  # 匹配到人脸
                     self.person_id, self.person_name = face_res
                     self.face_search_lock = True
@@ -95,6 +95,8 @@ class FaceServer:
         gray_img = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
         # 加载分类器
         face_detect = cv.CascadeClassifier('haarcascade_frontalface_default.xml')
+        face_detect.load('/home/lah/bs/face_server/face_recognition/classifier_file/haarcascade_frontalface_default.xml')
+        print(os.path.dirname(__name__))
         # 检测图像
         face = face_detect.detectMultiScale(gray_img, 1.1, 5)
         # 绘制框
@@ -171,7 +173,7 @@ class FaceServer:
         # 创建一个可以在给定图像上绘图的对象
         draw = ImageDraw.Draw(img)
         # 字体的格式
-        font_style = ImageFont.truetype("simsun.ttc", text_size, encoding="utf-8")
+        font_style = ImageFont.truetype("/home/lah/bs/face_server/face_recognition/simsun.ttc", text_size, encoding="utf-8")
         # 绘制文本
         draw.text(position, text, text_color, font=font_style)
         # 转换回OpenCV格式
