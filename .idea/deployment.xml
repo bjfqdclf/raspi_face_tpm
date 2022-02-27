@@ -9,17 +9,17 @@
           </mappings>
         </serverdata>
       </paths>
+      <paths name="bjfqdclf@192.168.184.128:22 (1)">
+        <serverdata>
+          <mappings>
+            <mapping local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
       <paths name="lah@10.2.12.218:22">
         <serverdata>
           <mappings>
             <mapping deploy="/home/lah/bs/face_server" local="$PROJECT_DIR$" />
-          </mappings>
-        </serverdata>
-      </paths>
-      <paths name="ubuntu@101.34.7.41:22">
-        <serverdata>
-          <mappings>
-            <mapping local="$PROJECT_DIR$" web="/" />
           </mappings>
         </serverdata>
       </paths>

@@ -9,22 +9,24 @@ from base.conf_obtain import sys_config
 from tem_measure.temp_comp_model import TempComp
 from tem_measure.temp_driver_model import enable_temp_driver
 from base.db_server import db_server
-
+import sys
 
 class FaceServer:
     DEVICE_ID = sys_config.device_id
-    WAIT_KEY = 10
+    WAIT_KEY = 8
     log = LogServer('face_server')
 
     face_search_lock = False
     is_temp = False
+    temp = None
     person_id = None
     person_name = None
     face_remove_count = 0
     last_face = None
     now_face = None
 
-    def __init__(self):
+    def __init__(self, path):
+        self.PATH = path
         try:
             self.cap = cv.VideoCapture(0)  # 打开默认摄像头
         except Exception as err:
@@ -37,7 +39,7 @@ class FaceServer:
             flag, france = self.cap.read()
             if not flag:
                 break
-            face = self.face_detect_demo(france)
+            face = self.face_detect(france)
 
             if isinstance(face, tuple):  # 未检测到人脸
                 self.face_remove_count += 1
@@ -58,8 +60,8 @@ class FaceServer:
             if (not self.face_search_lock) and (not self.person_id):
                 x, y, w, h = self.now_face
                 img_search = self.save_search(france)
-                cv.imwrite('/home/lah/bs/face_server/face_recognition/img/face_search.jpg', img_search)
-                face_res = face_search('/home/lah/bs/face_server/face_recognition/img/face_search.jpg')
+                cv.imwrite(os.path.join(self.PATH, 'face_recognition/img/face_search.jpg'), img_search)
+                face_res = face_search(os.path.join(self.PATH, 'face_recognition/img/face_search.jpg'))
                 if face_res:  # 匹配到人脸
                     self.person_id, self.person_name = face_res
                     self.face_search_lock = True
@@ -77,6 +79,7 @@ class FaceServer:
                         # 存数据库
                         self.data_save(person_temp)
                         self.is_temp = True
+                        self.temp = person_temp
 
                 except Exception as err:
                     self.log.error(err)
@@ -89,13 +92,13 @@ class FaceServer:
         # 释放摄像头
         self.cap.release()
 
-    def face_detect_demo(self, img):
+    def face_detect(self, img):
         """检测人脸"""
         # 转为灰度图片
         gray_img = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
         # 加载分类器
-        face_detect = cv.CascadeClassifier('haarcascade_frontalface_default.xml')
-        face_detect.load('/home/lah/bs/face_server/face_recognition/classifier_file/haarcascade_frontalface_default.xml')
+        face_detect = cv.CascadeClassifier(os.path.join(self.PATH, 'face_recognition/classifier_file/haarcascade_frontalface_default.xml'))
+        face_detect.load(os.path.join(self.PATH, 'face_recognition/classifier_file/haarcascade_frontalface_default.xml'))
         print(os.path.dirname(__name__))
         # 检测图像
         face = face_detect.detectMultiScale(gray_img, 1.1, 5)
@@ -107,6 +110,8 @@ class FaceServer:
                 text_flag = True
                 if self.person_name:
                     img = self._cv2_add_chinese_text(img, self.person_name, (x, y - 32), (0, 255, 0))
+                    if self.is_temp:
+                        img = self._cv2_add_chinese_text(img, f'{self.temp}C', (x + w, y - 32), (0, 255, 0))
                 else:
                     img = self._cv2_add_chinese_text(img, '未知', (x, y - 32), (0, 255, 0))
         cv.imshow('result', img)
@@ -190,6 +195,7 @@ class FaceServer:
         self.person_id = None
         self.person_name = None
         self.is_temp = False
+        self.temp = None
         self.log.info("初始化参数")
 
     def temp_compensation(self, obj_temp, outside_temp):
@@ -211,6 +217,8 @@ class FaceServer:
         if sys_config.measure_parts:  # 测腕温 开启温度补偿
             temp_comp = TempComp(obj_temp, outside_temp)
             person_temp = temp_comp.wrist_to_forehead_temp()
+        if person_temp > 41 or person_temp < 30:
+            person_temp = False
         return person_temp
 
     def data_save(self, person_temp):
