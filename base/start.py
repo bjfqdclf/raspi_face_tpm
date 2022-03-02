@@ -5,4 +5,3 @@ if __name__ == '__main__':
     from face_recognition.face_detect import FaceServer
     face_obj = FaceServer(path)
     face_obj.face_start()
-

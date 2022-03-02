@@ -7,7 +7,7 @@ import json
 import time
 
 
-def face_search(img_dir):
+def face_search(img_dir=False, img=False):
     """
     人脸搜索
     img_dir: 需要搜索的图片
@@ -15,10 +15,12 @@ def face_search(img_dir):
     """
     log = LogServer('face_search')
     start = time.time()
-    # img_dir = 'C:/Users/bjfqdclf/OneDrive/专属文件夹/学习/毕业设计\program/opencv_demo/img/1.name.jpg'
-    with open(img_dir, 'rb') as f:
-        base64_data = base64.b64encode(f.read())
-        base64_code = base64_data.decode()
+    if img_dir:
+        with open(img_dir, 'rb') as f:
+            base64_data = base64.b64encode(f.read())
+            base64_code = base64_data.decode()
+    if img:
+        base64_code = img
     try:
         # 实例化认证对象
         cred = credential.Credential("AKIDylIYXFgqiKeiV1GFwMVMxGI2WjfKjriI", "KOAfspVt0rRkmX2FBqEK9hzzjBMIejX3")

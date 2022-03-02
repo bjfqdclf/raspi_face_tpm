@@ -1,3 +1,5 @@
+import base64
+
 import cv2 as cv
 from PIL import Image, ImageDraw, ImageFont
 import os
@@ -13,7 +15,7 @@ import sys
 
 class FaceServer:
     DEVICE_ID = sys_config.device_id
-    WAIT_KEY = 8
+    WAIT_KEY = 4
     log = LogServer('face_server')
 
     face_search_lock = False
@@ -29,6 +31,10 @@ class FaceServer:
         self.PATH = path
         try:
             self.cap = cv.VideoCapture(0)  # 打开默认摄像头
+            self.cap.set(3, 640)
+            self.cap.set(4, 320)
+            self.cap.set(cv.CAP_PROP_FPS)
+
         except Exception as err:
             self.log.error(err)
 
@@ -58,10 +64,18 @@ class FaceServer:
                 self.init_all_static_var()
 
             if (not self.face_search_lock) and (not self.person_id):
-                x, y, w, h = self.now_face
                 img_search = self.save_search(france)
-                cv.imwrite(os.path.join(self.PATH, 'face_recognition/img/face_search.jpg'), img_search)
-                face_res = face_search(os.path.join(self.PATH, 'face_recognition/img/face_search.jpg'))
+                try:
+                    cv.imwrite(os.path.join(self.PATH, 'face_recognition/img/face_search.jpg'), img_search)
+                    # print(type(img_search))
+                    # _, buffer = cv.imencode('.jpg', img_search)
+                    # pic_str = base64.b64encode(buffer)
+                    # base64_data = pic_str.decode()
+                except Exception as e:
+                    self.log.error(e)
+                    continue
+
+                face_res = face_search(img_dir=os.path.join(self.PATH, 'face_recognition/img/face_search.jpg'))
                 if face_res:  # 匹配到人脸
                     self.person_id, self.person_name = face_res
                     self.face_search_lock = True
@@ -110,8 +124,8 @@ class FaceServer:
                 text_flag = True
                 if self.person_name:
                     img = self._cv2_add_chinese_text(img, self.person_name, (x, y - 32), (0, 255, 0))
-                    if self.is_temp:
-                        img = self._cv2_add_chinese_text(img, f'{self.temp}C', (x + w, y - 32), (0, 255, 0))
+                    # if self.is_temp:
+                    #     img = self._cv2_add_chinese_text(img, f'{self.temp}C', (x + w, y - 32), (0, 255, 0))
                 else:
                     img = self._cv2_add_chinese_text(img, '未知', (x, y - 32), (0, 255, 0))
         cv.imshow('result', img)
@@ -157,12 +171,11 @@ class FaceServer:
         # 位置判定
         distance = math_server.ptop_distance((last_x + last_w) / 2, (last_y + last_h) / 2, (now_x + now_w) / 2,
                                              (now_y + now_h) / 2)
-        if distance > 20:
+        if distance > 50:
             return False
         return True
 
-    @staticmethod
-    def _cv2_add_chinese_text(img, text, position, text_color=(0, 255, 0), text_size=30):
+    def _cv2_add_chinese_text(self, img, text, position, text_color=(0, 255, 0), text_size=30):
         """
         给图片加中文文字
 
@@ -178,7 +191,7 @@ class FaceServer:
         # 创建一个可以在给定图像上绘图的对象
         draw = ImageDraw.Draw(img)
         # 字体的格式
-        font_style = ImageFont.truetype("/home/lah/bs/face_server/face_recognition/simsun.ttc", text_size, encoding="utf-8")
+        font_style = ImageFont.truetype(os.path.join(self.PATH, "face_recognition/simsun.ttc"), text_size, encoding="utf-8")
         # 绘制文本
         draw.text(position, text, text_color, font=font_style)
         # 转换回OpenCV格式
