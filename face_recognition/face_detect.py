@@ -13,6 +13,7 @@ from tem_measure.temp_driver_model import enable_temp_driver
 from base.db_server import db_server
 import sys
 
+
 class FaceServer:
     DEVICE_ID = sys_config.device_id
     WAIT_KEY = 4

@@ -5,6 +5,7 @@ from base.log_server import LogServer
 import base64
 import json
 import time
+from base.conf_obtain import sys_config
 
 
 def face_search(img_dir=False, img=False):
@@ -23,7 +24,7 @@ def face_search(img_dir=False, img=False):
         base64_code = img
     try:
         # 实例化认证对象
-        cred = credential.Credential("AKIDylIYXFgqiKeiV1GFwMVMxGI2WjfKjriI", "KOAfspVt0rRkmX2FBqEK9hzzjBMIejX3")
+        cred = credential.Credential(sys_config.SecretId, sys_config.SecretKey)
         client = iai_client.IaiClient(cred, "ap-shanghai")
 
         # 实例化请求对象
