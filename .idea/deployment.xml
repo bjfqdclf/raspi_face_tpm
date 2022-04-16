@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="PublishConfigData" autoUpload="Always" serverName="lah@10.2.8.172:22" remoteFilesAllowedToDisappearOnAutoupload="false">
+  <component name="PublishConfigData" autoUpload="Always" serverName="lah@192.168.5.112:22" remoteFilesAllowedToDisappearOnAutoupload="false">
     <serverData>
       <paths name="bjfqdclf@192.168.184.128:22">
         <serverdata>
@@ -10,6 +10,20 @@
         </serverdata>
       </paths>
       <paths name="bjfqdclf@192.168.184.128:22 (1)">
+        <serverdata>
+          <mappings>
+            <mapping local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="bjfqdclf@192.168.184.128:22 (2)">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/home/bjfqdclf/bs/raspi" local="$PROJECT_DIR$" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="bjfqdclf@192.168.184.128:22 (3)">
         <serverdata>
           <mappings>
             <mapping local="$PROJECT_DIR$" web="/" />
@@ -30,6 +44,13 @@
           </mappings>
         </serverdata>
       </paths>
+      <paths name="lah@192.168.5.112:22">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/home/lah/bs/raspi_sys" local="$PROJECT_DIR$" />
+          </mappings>
+        </serverdata>
+      </paths>
       <paths name="ubuntu@10.2.12.218:22">
         <serverdata>
           <mappings>
@@ -37,7 +58,42 @@
           </mappings>
         </serverdata>
       </paths>
+      <paths name="ubuntu@10.2.12.218:22 (1)">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/home/ubuntu/bs/raspi_sys" local="$PROJECT_DIR$" />
+          </mappings>
+        </serverdata>
+      </paths>
       <paths name="ubuntu@101.34.7.41:22">
+        <serverdata>
+          <mappings>
+            <mapping local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="ubuntu@101.34.7.41:22 (1)">
+        <serverdata>
+          <mappings>
+            <mapping local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="ubuntu@101.34.7.41:22 (2)">
+        <serverdata>
+          <mappings>
+            <mapping local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="ubuntu@101.34.7.41:22 (4)">
+        <serverdata>
+          <mappings>
+            <mapping local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="ubuntu@101.34.7.41:22 (5)">
         <serverdata>
           <mappings>
             <mapping local="$PROJECT_DIR$" web="/" />

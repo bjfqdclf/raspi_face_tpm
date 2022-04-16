@@ -1,8 +1,10 @@
 import smbus
 from time import sleep
-
+from base.conf_obtain import sys_config
 
 class MLX90614:
+    OPEN_COMPENSTATE = sys_config.distance_compensation
+
     MLX90614_RAWIR1 = 0x04
     MLX90614_RAWIR2 = 0x05
     MLX90614_TA = 0x06
@@ -56,13 +58,40 @@ class MLX90614:
         data = self.read_reg(self.MLX90614_TOBJ1)
         return self.data_to_temp(data)
 
+    def get_temp(self):
+        temp_list = []
+        count = 20
+        while len(temp_list) < 6:
+            if count == 0:
+                break
+            count -= 1
+            obj_temp = self.get_obj_temp()
+            outside_temp = self.get_outside_temp()
+            if self.OPEN_COMPENSTATE:
+                temp_comp_obj = TempComp(obj_temp=obj_temp, outside_temp=outside_temp)
+                temp = temp_comp_obj.wrist_to_forehead_temp()
+            else:
+                temp = obj_temp
+            if temp:
+                temp_list.append(temp)
+            count += 1
+        if not temp_list:
+            return None
+        print(temp_list)
+        temp_list = sorted(temp_list)
+
+        return temp_list[int(len(temp_list) / 2)]
+
 
 enable_temp_driver = MLX90614()
 
 if __name__ == "__main__":
     from temp_comp_model import TempComp
+    while 1:
+        temp = enable_temp_driver.get_temp()
+        if temp:
+            print(temp)
+        else:
+            print('----')
 
-    temp_comp_obj = TempComp(wrist_temp=temp_driver.get_obj_temp(), outside_temp=temp_driver.get_outside_temp())
-    print('amb:', temp_driver.get_outside_temp())
-    print('job1:', temp_driver.get_obj_temp())
-    print(temp_comp_obj.forehead_temp)
+    # print(temp_comp_obj.forehead_temp)
