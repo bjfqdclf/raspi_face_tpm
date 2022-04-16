@@ -1,6 +1,8 @@
 import smbus
 from time import sleep
 from base.conf_obtain import sys_config
+from tem_measure.temp_comp_model import TempComp
+
 
 class MLX90614:
     OPEN_COMPENSTATE = sys_config.distance_compensation
@@ -40,7 +42,7 @@ class MLX90614:
                 err = e
                 # "Rate limiting" - sleeping to prevent problems with sensor
                 # when requesting data too quickly
-                sleep(self.comm_sleep_amount)
+                # sleep(self.comm_sleep_amount)
         # By this time, we made a couple requests and the sensor didn't respond
         # (judging by the fact we haven't returned from this function yet)
         # So let's just re-raise the last IOError we got
@@ -60,24 +62,23 @@ class MLX90614:
 
     def get_temp(self):
         temp_list = []
-        count = 20
+        count = 0
         while len(temp_list) < 6:
-            if count == 0:
+            if count > 20:
                 break
-            count -= 1
+            count += 1
             obj_temp = self.get_obj_temp()
             outside_temp = self.get_outside_temp()
             if self.OPEN_COMPENSTATE:
                 temp_comp_obj = TempComp(obj_temp=obj_temp, outside_temp=outside_temp)
-                temp = temp_comp_obj.wrist_to_forehead_temp()
+                act_temp = temp_comp_obj.wrist_to_forehead_temp()
             else:
-                temp = obj_temp
-            if temp:
-                temp_list.append(temp)
+                act_temp = obj_temp
+            if act_temp:
+                temp_list.append(act_temp)
             count += 1
         if not temp_list:
             return None
-        print(temp_list)
         temp_list = sorted(temp_list)
 
         return temp_list[int(len(temp_list) / 2)]
@@ -86,7 +87,7 @@ class MLX90614:
 enable_temp_driver = MLX90614()
 
 if __name__ == "__main__":
-    from temp_comp_model import TempComp
+
     while 1:
         temp = enable_temp_driver.get_temp()
         if temp:

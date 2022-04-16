@@ -27,6 +27,8 @@ class FaceServer:
     face_remove_count = 0
     last_face = None
     now_face = None
+    database = None
+    save_data = False
 
     def __init__(self, path):
         self.PATH = path
@@ -85,19 +87,22 @@ class FaceServer:
                     self.log.info(f'检测到{self.person_name}')
             if self.person_id and not self.is_temp:
                 # 温度检测 有人员id信息&没有温度测量
-                try:
-                    obj_temp = enable_temp_driver.get_obj_temp()  # 测量温度
-                    outside_temp = enable_temp_driver.get_outside_temp()  # 环境温度
-                    # 根据系统配置决定是否需要补偿
-                    person_temp = self.temp_compensation(obj_temp, outside_temp)
-                    if person_temp:
-                        # 存数据库
-                        self.data_save(person_temp)
-                        self.is_temp = True
-                        self.temp = person_temp
 
-                except Exception as err:
-                    self.log.error(err)
+                # obj_temp = enable_temp_driver.get_obj_temp()  # 测量温度
+                # outside_temp = enable_temp_driver.get_outside_temp()  # 环境温度
+                # # 根据系统配置决定是否需要补偿
+                # person_temp = self.temp_compensation(obj_temp, outside_temp)
+                person_temp = enable_temp_driver.get_temp()
+                print('person_temp1')
+                if person_temp:
+                    print('person_temp')
+                    person_temp = format(person_temp, '.1f')
+                    self.log.info(f'温度{person_temp}')
+                    # 存数据库
+                    if not self.save_data:
+                        self.data_save(person_temp)
+                    self.is_temp = True
+                    self.temp = person_temp
 
             if ord('q') == cv.waitKey(self.WAIT_KEY):
                 self.log.info('程序退出...')
@@ -106,6 +111,7 @@ class FaceServer:
         cv.destroyAllWindows()
         # 释放摄像头
         self.cap.release()
+
 
     def face_detect(self, img):
         """检测人脸"""
@@ -123,10 +129,18 @@ class FaceServer:
             cv.rectangle(img, (x, y), (x + w, y + h), color=(0, 0, 255), thickness=2)
             if not text_flag:  # 只标记第一个人脸名字
                 text_flag = True
+                if self.temp:
+                    img = self._cv2_add_chinese_text(img, self.temp, (x+20, y - 32), (0, 255, 0))
                 if self.person_name:
-                    img = self._cv2_add_chinese_text(img, self.person_name, (x, y - 32), (0, 255, 0))
-                    # if self.is_temp:
-                    #     img = self._cv2_add_chinese_text(img, f'{self.temp}C', (x + w, y - 32), (0, 255, 0))
+                    if self.temp:
+                        if self.save_data:
+                            img = self._cv2_add_chinese_text(img, f'{self.person_name}[{self.temp}][识别成功]', (x, y - 32),
+                                                             (0, 255, 0))
+                        else:
+                            img = self._cv2_add_chinese_text(img, f'{self.person_name}[{self.temp}]]', (x, y - 32), (0, 255, 0))
+
+                    else:
+                        img = self._cv2_add_chinese_text(img, self.person_name, (x, y - 32), (0, 255, 0))
                 else:
                     img = self._cv2_add_chinese_text(img, '未知', (x, y - 32), (0, 255, 0))
         cv.imshow('result', img)
@@ -211,6 +225,7 @@ class FaceServer:
         self.is_temp = False
         self.temp = None
         self.log.info("初始化参数")
+        self.database = None
 
     def temp_compensation(self, obj_temp, outside_temp):
         """
@@ -240,5 +255,5 @@ class FaceServer:
         将人的信息与对应温度、时间、设备信息存入数据库
         """
         time = db_server.db_datetime()
-        sql = f"""INSERT INTO app01_dailyfacerecord(person_name,person_id,temp,device_id,time) VALUES ('{self.person_name}','{self.person_id}',{person_temp},{self.DEVICE_ID},'{time}')"""
-        db_server.db_execute(sql)
+        sql = f"""INSERT INTO app01_dailyfacerecord(person_name,person_id,temp,device_id,time) VALUES ('{self.person_name}','{self.person_id}',{self.temp},{self.DEVICE_ID},'{time}')"""
+        self.save_data = db_server.db_execute(sql)

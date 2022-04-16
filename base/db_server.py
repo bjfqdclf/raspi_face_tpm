@@ -48,9 +48,12 @@ class DatabaseServer:
             self.db.commit()
         except Exception as err:
             self.log.error(err)
-            self.db.rollback()
+            if self.db:
+                self.db.rollback()
+            return False
         else:
             self.log.info(f"{sql} 数据插入成功")
+            return True
 
     def db_close(self):
         self.db.close()
