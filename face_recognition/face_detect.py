@@ -1,4 +1,5 @@
 import base64
+import time
 
 import cv2 as cv
 from PIL import Image, ImageDraw, ImageFont
@@ -16,7 +17,7 @@ import sys
 
 class FaceServer:
     DEVICE_ID = sys_config.device_id
-    WAIT_KEY = 4
+    WAIT_KEY = 30
     log = LogServer('face_server')
 
     face_search_lock = False
@@ -36,7 +37,8 @@ class FaceServer:
             self.cap = cv.VideoCapture(0)  # 打开默认摄像头
             self.cap.set(3, 640)
             self.cap.set(4, 320)
-            self.cap.set(cv.CAP_PROP_FPS)
+            self.cap.set(cv.CAP_PROP_FPS, self.WAIT_KEY)
+            # self.cap.set(cv.CAP_PROP_FOURCC, cv.VideoWriter_fourcc('M', 'J', 'P', 'G'))
 
         except Exception as err:
             self.log.error(err)
@@ -44,8 +46,12 @@ class FaceServer:
         self.face_start()
 
     def face_start(self):
+        start_time = time.time()
         while True:
+            print(time.time() - start_time)
+            start_time = time.time()
             flag, france = self.cap.read()
+            flag, france = self.cap.read()  # opencv取上一帧，导致帧不连续，强制刷写可拿到连续帧
             if not flag:
                 break
             face = self.face_detect(france)
@@ -70,32 +76,21 @@ class FaceServer:
                 img_search = self.save_search(france)
                 try:
                     cv.imwrite(os.path.join(self.PATH, 'face_recognition/img/face_search.jpg'), img_search)
-                    # print(type(img_search))
-                    # _, buffer = cv.imencode('.jpg', img_search)
-                    # pic_str = base64.b64encode(buffer)
-                    # base64_data = pic_str.decode()
                 except Exception as e:
                     self.log.error(e)
                     continue
-
-                face_res = face_search(img_dir=os.path.join(self.PATH, 'face_recognition/img/face_search.jpg'))
-                if face_res:  # 匹配到人脸
-                    self.person_id, self.person_name = face_res
-                    self.face_search_lock = True
-                    self.face_remove_count = 0
-                    self.last_face = self.now_face
-                    self.log.info(f'检测到{self.person_name}')
+                if not self.person_name:
+                    face_res = face_search(img_dir=os.path.join(self.PATH, 'face_recognition/img/face_search.jpg'))
+                    if face_res:  # 匹配到人脸
+                        self.person_id, self.person_name = face_res
+                        self.face_search_lock = True
+                        self.face_remove_count = 0
+                        self.last_face = self.now_face
+                        self.log.info(f'检测到{self.person_name}')
             if self.person_id and not self.is_temp:
                 # 温度检测 有人员id信息&没有温度测量
-
-                # obj_temp = enable_temp_driver.get_obj_temp()  # 测量温度
-                # outside_temp = enable_temp_driver.get_outside_temp()  # 环境温度
-                # # 根据系统配置决定是否需要补偿
-                # person_temp = self.temp_compensation(obj_temp, outside_temp)
                 person_temp = enable_temp_driver.get_temp()
-                print('person_temp1')
                 if person_temp:
-                    print('person_temp')
                     person_temp = format(person_temp, '.1f')
                     self.log.info(f'温度{person_temp}')
                     # 存数据库
@@ -120,7 +115,6 @@ class FaceServer:
         # 加载分类器
         face_detect = cv.CascadeClassifier(os.path.join(self.PATH, 'face_recognition/classifier_file/haarcascade_frontalface_default.xml'))
         face_detect.load(os.path.join(self.PATH, 'face_recognition/classifier_file/haarcascade_frontalface_default.xml'))
-        print(os.path.dirname(__name__))
         # 检测图像
         face = face_detect.detectMultiScale(gray_img, 1.1, 5)
         # 绘制框
@@ -255,5 +249,6 @@ class FaceServer:
         将人的信息与对应温度、时间、设备信息存入数据库
         """
         time = db_server.db_datetime()
-        sql = f"""INSERT INTO app01_dailyfacerecord(person_name,person_id,temp,device_id,time) VALUES ('{self.person_name}','{self.person_id}',{self.temp},{self.DEVICE_ID},'{time}')"""
-        self.save_data = db_server.db_execute(sql)
+        print(f'{self.person_name},{self.person_id},{person_temp},{self.DEVICE_ID},{time}')
+        sql = f"""INSERT INTO app01_dailyfacerecord(person_name,person_code,temp,device_code,time) VALUES ('{self.person_name}','{self.person_id}',{person_temp},{self.DEVICE_ID},'{time}')"""
+        self.save_data = self.save_data = db_server.db_execute(sql)

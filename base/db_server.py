@@ -48,6 +48,7 @@ class DatabaseServer:
             self.db.commit()
         except Exception as err:
             self.log.error(err)
+            print(err)
             if self.db:
                 self.db.rollback()
             return False

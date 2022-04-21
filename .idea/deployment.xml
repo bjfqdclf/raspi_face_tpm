@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="PublishConfigData" autoUpload="Always" serverName="lah@192.168.5.112:22" remoteFilesAllowedToDisappearOnAutoupload="false">
+  <component name="PublishConfigData" autoUpload="Always" serverName="lah@192.168.100.112:22" remoteFilesAllowedToDisappearOnAutoupload="false">
     <serverData>
       <paths name="bjfqdclf@192.168.184.128:22">
         <serverdata>
@@ -38,6 +38,13 @@
         </serverdata>
       </paths>
       <paths name="lah@10.2.8.172:22">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/home/lah/bs/raspi_sys" local="$PROJECT_DIR$" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="lah@192.168.100.112:22">
         <serverdata>
           <mappings>
             <mapping deploy="/home/lah/bs/raspi_sys" local="$PROJECT_DIR$" />
