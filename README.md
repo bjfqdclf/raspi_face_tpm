@@ -90,7 +90,7 @@ distance_compensation = False   # 距离补偿 需要有超声波传感器
 
 ### 3.1.1.2 配置文件读取流程图
 
-![配置文件读取.png](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/25237f58-5ac3-42e5-9849-28fb97609b7f/配置文件读取.png)
+![配置文件读取](https://user-images.githubusercontent.com/45928505/168596772-4b65f4da-b28b-481e-8592-2fa719aa785a.png)
 
 ### 3.1.1.3 配置文件读取实现
 
@@ -170,8 +170,9 @@ sys_config = SysConfig()
 5. critical
 
 ### 3.1.2.3 流程图
+![log输出](https://user-images.githubusercontent.com/45928505/168596894-e6b0392a-9a09-485a-918c-cc98f421df80.jpg)
 
-![log输出.jpg](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/f46c075a-13df-4253-abf7-293f66d753f0/log输出.jpg)
+
 
 ### 3.1.2.4 代码实现
 
@@ -246,6 +247,7 @@ class LogServer:
 > 
 
 ### 3.1.3.2 流程图
+![数据库连接](https://user-images.githubusercontent.com/45928505/168596941-53a6280e-7a0a-40d6-ad98-678bdbea29c5.jpg)
 
 
 ### 3.1.3.3 代码实现
@@ -311,8 +313,10 @@ def db_execute(self, sql):
 ```
 
 ## 3.2 主体功能实现
+### 3.2.1 人脸识别流程
+![raspi系统主架构](https://user-images.githubusercontent.com/45928505/168597107-27b29319-ea4f-41e3-a083-a8b8b5ebdd7c.jpg)
 
-### 3.2.1 红外测温
+### 3.2.2 红外测温
 
 - 硬件型号：MLX90614ESF-BBA
 - 主要服务：
